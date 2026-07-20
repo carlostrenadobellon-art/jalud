@@ -171,6 +171,11 @@ table.grid th.sortable.active { color: var(--accent); }
 .print-header { display: none; }
 
 @media print {
+  html, body {
+    background: #fff !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
   body * { visibility: hidden; }
   .printing-target, .printing-target * { visibility: visible; }
   .printing-target {
