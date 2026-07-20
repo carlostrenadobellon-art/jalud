@@ -145,6 +145,7 @@
     initPerfilJugador();
     initHistorial();
     initDescargaPdf();
+    initInformeSemanal();
 
     $('#formAlta').addEventListener('submit', (e) => {
       e.preventDefault();
@@ -658,6 +659,93 @@
     const tarjeta = $(selectorPanel).querySelector('.card');
     tarjeta.classList.add('printing-target');
     window.print();
+  }
+
+  // ---------- Informe semanal (póster para el vestuario) ----------
+
+  let informeInit = false;
+  let chartInformeEvolucion;
+  const COLORES_EVOLUCION = ['#0d6cb0', '#b51e45', '#f5b400', '#2f8f4e', '#7c3aed'];
+
+  function initInformeSemanal() {
+    if (informeInit) return;
+    informeInit = true;
+
+    apiGet('calendario').then((res) => {
+      if (!res.ok) return;
+      const hoy = new Date().toISOString().slice(0, 10);
+      let semanaActual = res.semanas[0].numSemana;
+      res.semanas.forEach((s) => {
+        if (hoy >= s.fechaInicio && hoy <= s.fechaFin) semanaActual = s.numSemana;
+        const opt = document.createElement('option');
+        opt.value = s.numSemana;
+        opt.textContent = 'Semana ' + s.numSemana + ' (' + s.fechaInicio + ' a ' + s.fechaFin + ')';
+        $('#selectInformeSemana').appendChild(opt);
+      });
+      $('#selectInformeSemana').value = semanaActual;
+      cargarInformeSemanal(semanaActual);
+    });
+
+    $('#selectInformeSemana').addEventListener('change', (e) => cargarInformeSemanal(e.target.value));
+
+    $('#btnDescargarInforme').addEventListener('click', () => {
+      $('#informePoster').classList.add('printing-target');
+      window.print();
+    });
+  }
+
+  function cargarInformeSemanal(numSemana) {
+    apiGet('informeSemanal', { numSemana }).then((res) => {
+      if (!res.ok) { $('#informePoster').innerHTML = '<p>' + res.error + '</p>'; return; }
+      pintarInforme(res);
+    });
+  }
+
+  function pintarInforme(data) {
+    $('#informeSubtitulo').textContent = 'Semana ' + data.semana.numSemana + ' (' + data.semana.fechaInicio
+      + ' a ' + data.semana.fechaFin + ') · ' + formatMesLabel_(data.mes);
+
+    pintarPosterTop5_('#posterTop5Semanal', data.top5Semanal);
+    pintarPosterTop5_('#posterTop5Mensual', data.top5Mensual);
+    pintarPosterTop5_('#posterTop5Anual', data.top5Anual);
+
+    chartInformeEvolucion = pintarChartEvolucionInforme_(data.evolucion, chartInformeEvolucion);
+  }
+
+  function pintarPosterTop5_(sel, top5) {
+    if (top5.length === 0) {
+      $(sel).innerHTML = '<li>Sin datos todavía.</li>';
+      return;
+    }
+    $(sel).innerHTML = top5.map((r, idx) => {
+      const rango = idx < 3 ? 'rank-' + (idx + 1) : '';
+      return '<li class="' + rango + '"><span class="medal">' + (idx + 1) + '</span>'
+        + '<span class="nombre">' + r.jugador + '</span>'
+        + '<span class="puntos">' + r.puntosTotales + ' pts</span></li>';
+    }).join('');
+  }
+
+  function pintarChartEvolucionInforme_(evolucion, existente) {
+    if (existente) existente.destroy();
+    if (evolucion.jugadores.length === 0 || evolucion.semanas.length === 0) return null;
+
+    const datasets = evolucion.jugadores.map((nombre, idx) => ({
+      label: nombre,
+      data: evolucion.semanas.map((s) => s.puntos[nombre] || 0),
+      borderColor: COLORES_EVOLUCION[idx % COLORES_EVOLUCION.length],
+      backgroundColor: 'transparent',
+      tension: .3
+    }));
+
+    return new Chart($('#chartInformeEvolucion'), {
+      type: 'line',
+      data: { labels: evolucion.semanas.map((s) => 'S' + s.numSemana), datasets },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { x: { ticks: { color: '#444' } }, y: { ticks: { color: '#444' } } },
+        plugins: { legend: { display: true, labels: { color: '#222' } } }
+      }
+    });
   }
 
   // ---------- Arranque ----------

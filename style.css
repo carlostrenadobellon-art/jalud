@@ -166,6 +166,65 @@ table.grid th.sortable.active { color: var(--accent); }
 }
 .row-actions .btn-eliminar { background: var(--error); color: #1a0b0b; }
 
+/* ---------- Informe semanal (póster para vestuario) ----------
+   Siempre en blanco, tanto en la vista previa dentro de la app (que va
+   sobre fondo oscuro) como al imprimir, para que se vea igual en los dos
+   sitios y no dependa del tema oscuro del resto de la PWA. */
+
+.poster {
+  background: #fff;
+  color: #171a1f;
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+
+.poster-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 4px solid;
+  border-image: linear-gradient(90deg, var(--accent), var(--accent-2), var(--gold)) 1;
+}
+.poster-crest { height: 64px; width: auto; }
+.poster-header h2 { color: var(--accent); margin: 0; font-size: 1.3rem; }
+.poster-header p { color: #555; margin: .35rem 0 0; }
+
+.poster-section { margin-bottom: 1.75rem; }
+.poster-title { color: var(--accent-2); font-size: 1.05rem; margin: 0 0 .75rem; }
+
+.poster-top5 { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: .5rem; }
+.poster-top5 li {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .6rem .75rem;
+  border-radius: 8px;
+  background: #f2f5f8;
+  font-weight: 600;
+}
+.poster-top5 li .medal {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 800;
+  flex-shrink: 0;
+  background: var(--accent);
+}
+.poster-top5 li.rank-1 .medal { background: var(--gold); color: #4a3600; }
+.poster-top5 li.rank-2 .medal { background: #b8c2cc; color: #23303a; }
+.poster-top5 li.rank-3 .medal { background: #c98a4b; color: #3a2007; }
+.poster-top5 li .nombre { flex: 1; }
+.poster-top5 li .puntos { color: var(--accent); font-size: 1.05rem; white-space: nowrap; }
+
+.poster-chart { height: 260px; background: #fff; }
+
 /* ---------- Impresión (Descargar PDF) ---------- */
 
 .print-header { display: none; }

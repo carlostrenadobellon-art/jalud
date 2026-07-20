@@ -44,6 +44,7 @@
   <section id="viewTecnico" class="view hidden">
     <nav class="tabs">
       <button data-tab="entrada" class="tab-btn active">Entrada semanal</button>
+      <button data-tab="informe" class="tab-btn">Informe semanal</button>
       <button data-tab="rankings" class="tab-btn">Rankings</button>
       <button data-tab="perfil" class="tab-btn">Perfil jugador</button>
       <button data-tab="historial" class="tab-btn">Historial</button>
@@ -55,6 +56,44 @@
         <label>Semana</label>
         <select id="selectSemana"></select>
         <div id="gridContainer"></div>
+      </div>
+    </div>
+
+    <div id="tabInforme" class="tab-panel hidden">
+      <div class="card">
+        <label>Semana</label>
+        <select id="selectInformeSemana"></select>
+        <button type="button" id="btnDescargarInforme" class="btn-secundario">Descargar / Imprimir informe</button>
+
+        <div id="informePoster" class="poster">
+          <div class="poster-header">
+            <img src="icons/escudo-levante.png" alt="Escudo Levante UD" class="poster-crest">
+            <div>
+              <h2>Informe Semanal — Competitiva Interna Juvenil A</h2>
+              <p id="informeSubtitulo"></p>
+            </div>
+          </div>
+
+          <div class="poster-section">
+            <h3 class="poster-title">🏆 Top 5 de la semana</h3>
+            <ol class="poster-top5" id="posterTop5Semanal"></ol>
+          </div>
+
+          <div class="poster-section">
+            <h3 class="poster-title">📅 Top 5 del mes</h3>
+            <ol class="poster-top5" id="posterTop5Mensual"></ol>
+          </div>
+
+          <div class="poster-section">
+            <h3 class="poster-title">🏅 Top 5 de la temporada</h3>
+            <ol class="poster-top5" id="posterTop5Anual"></ol>
+          </div>
+
+          <div class="poster-section">
+            <h3 class="poster-title">📈 Evolución de los líderes de la temporada</h3>
+            <div class="chart-wrap poster-chart"><canvas id="chartInformeEvolucion"></canvas></div>
+          </div>
+        </div>
       </div>
     </div>
 
