@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Competitiva Interna Juvenil A</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f172a">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <h1>Competitiva Interna Juvenil A</h1>
+  <div id="userBadge" class="hidden">
+    <span id="userName"></span>
+    <button id="btnLogout">Salir</button>
+  </div>
+</header>
+
+<main id="app">
+
+  <!-- LOGIN -->
+  <section id="viewLogin" class="view">
+    <form id="formLogin" class="card">
+      <h2>Iniciar sesión</h2>
+      <label>Usuario / Código</label>
+      <input type="text" id="loginUsuario" autocomplete="username" required>
+      <label>Contraseña / Código</label>
+      <input type="password" id="loginPassword" autocomplete="current-password" required>
+      <button type="submit">Entrar</button>
+      <p id="loginError" class="error hidden"></p>
+    </form>
+  </section>
+
+  <!-- VISTA TÉCNICO -->
+  <section id="viewTecnico" class="view hidden">
+    <nav class="tabs">
+      <button data-tab="entrada" class="tab-btn active">Entrada semanal</button>
+      <button data-tab="rankings" class="tab-btn">Rankings</button>
+      <button data-tab="jugadores" class="tab-btn">Jugadores</button>
+    </nav>
+
+    <div id="tabEntrada" class="tab-panel">
+      <div class="card">
+        <label>Semana</label>
+        <select id="selectSemana"></select>
+        <div id="gridContainer"></div>
+      </div>
+    </div>
+
+    <div id="tabRankings" class="tab-panel hidden">
+      <div class="card">
+        <label>Mes</label>
+        <input type="month" id="selectMes">
+        <div class="chart-wrap"><canvas id="chartMensual"></canvas></div>
+        <h3>Top 5 del mes</h3>
+        <ol id="top5Mensual"></ol>
+        <h3>Ranking anual acumulado</h3>
+        <div class="chart-wrap"><canvas id="chartAnual"></canvas></div>
+        <h3>Top 5 del año</h3>
+        <ol id="top5Anual"></ol>
+      </div>
+    </div>
+
+    <div id="tabJugadores" class="tab-panel hidden">
+      <div class="card">
+        <h3>Dar de alta jugador</h3>
+        <form id="formAlta">
+          <input type="text" id="altaNombre" placeholder="Nombre" required>
+          <input type="email" id="altaEmail" placeholder="Email (para informes)">
+          <input type="date" id="altaFecha" required>
+          <button type="submit">Dar de alta</button>
+        </form>
+        <h3>Dar de baja jugador</h3>
+        <form id="formBaja">
+          <select id="bajaJugador"></select>
+          <input type="date" id="bajaFecha" required>
+          <button type="submit">Dar de baja</button>
+        </form>
+        <p id="jugadoresMsg" class="msg hidden"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- VISTA JUGADOR -->
+  <section id="viewJugador" class="view hidden">
+    <div class="card">
+      <h2 id="jugadorSaludo"></h2>
+      <label>Mes</label>
+      <input type="month" id="jugadorSelectMes">
+      <div class="chart-wrap"><canvas id="chartJugadorMensual"></canvas></div>
+      <h3>Top 5 del mes</h3>
+      <ol id="jugadorTop5Mensual"></ol>
+      <h3>Ranking anual acumulado</h3>
+      <div class="chart-wrap"><canvas id="chartJugadorAnual"></canvas></div>
+      <h3>Top 5 del año</h3>
+      <ol id="jugadorTop5Anual"></ol>
+    </div>
+  </section>
+
+</main>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
