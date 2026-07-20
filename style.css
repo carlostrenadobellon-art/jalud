@@ -263,19 +263,26 @@ table.grid th.sortable.active { color: var(--accent); }
 .split-asignados .split-list li { background: #fbeceb; color: #7a1f18; }
 .split-list li .puntos { font-weight: 500; opacity: .8; }
 
-/* ---------- Impresión (Descargar PDF) ---------- */
+/* ---------- Impresión (Descargar PDF) ----------
+   La cabecera (escudo + título) va dentro de un <thead> de una tabla que
+   envuelve todo el contenido imprimible (ver .print-table más abajo). Los
+   navegadores repiten el <thead> al principio de cada página impresa de
+   forma nativa — es una función de toda la vida del motor de impresión,
+   mucho más fiable que intentar fijar un elemento con "position: fixed"
+   (que en la práctica no se comportaba igual en todos los casos). */
 
 .print-header { display: none; }
+.print-table { width: 100%; border-collapse: collapse; }
+.print-table > thead > tr > td,
+.print-table > tbody > tr > td {
+  padding: 0;
+  text-align: left;
+  font-weight: normal;
+  vertical-align: top;
+}
 
 @media print {
-  /* El margen superior de la página reserva sitio para la cabecera en TODAS
-     las hojas (a diferencia de un padding-top en el contenido, que solo se
-     aplicaría una vez al principio del documento, no en cada salto de
-     página). El resto de márgenes son la "zona de seguridad" normal. */
-  @page {
-    margin: 1.6cm;
-    margin-top: 3.4cm;
-  }
+  @page { margin: 1.6cm; }
 
   html, body {
     background: #fff !important;
@@ -294,31 +301,28 @@ table.grid th.sortable.active { color: var(--accent); }
     box-shadow: none;
   }
 
-  /* Cabecera (escudo + título) fija: el navegador la repite en cada página
-     impresa, dentro del margen superior reservado arriba. No pegada al
-     borde físico del papel, para no perderse en zonas no imprimibles. */
   .printing-target .print-header,
   .printing-target .poster-header {
-    position: fixed;
-    top: .5cm;
-    left: 0;
-    right: 0;
-    z-index: 10;
     display: flex;
     align-items: center;
     gap: 1rem;
     background: #fff;
-    margin: 0;
-    padding-bottom: .6rem;
+    margin: 0 0 1rem;
+    padding-bottom: .75rem;
     border-bottom: 3px solid;
     border-image: linear-gradient(90deg, #0d6cb0, #b51e45, #f5b400) 1;
   }
   .printing-target .print-crest,
-  .printing-target .poster-crest { height: 42px; width: auto; }
+  .printing-target .poster-crest { height: 50px; width: auto; }
   .printing-target .print-header h2,
-  .printing-target .poster-header h2 { color: #0d6cb0; margin: 0; font-size: 1.1rem; }
+  .printing-target .poster-header h2 { color: #0d6cb0; margin: 0; font-size: 1.15rem; }
   .printing-target .print-header p,
   .printing-target .poster-header p { color: #444; margin: .2rem 0 0; font-size: .85rem; }
+
+  /* El <thead> se repite; que su fila no intente "no partirse" junto con
+     todo el resto — es la única fila que TIENE que poder aparecer sola en
+     cada página. */
+  .printing-target thead { display: table-header-group; }
 
   .printing-target h3 { color: #b51e45; border-left-color: #b51e45; }
 

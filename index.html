@@ -66,101 +66,136 @@
         <button type="button" id="btnDescargarInforme" class="btn-secundario">Descargar / Imprimir informe</button>
 
         <div id="informePoster" class="poster">
-          <div class="poster-header">
-            <img src="icons/escudo-levante.png" alt="Escudo Levante UD" class="poster-crest">
-            <div>
-              <h2>Informe Semanal — Competitiva Interna Juvenil A</h2>
-              <p id="informeSubtitulo"></p>
-            </div>
-          </div>
+          <!-- Tabla con thead: los navegadores repiten el <thead> al principio
+               de cada página impresa de forma nativa (mucho más fiable que
+               "position: fixed"), así que la cabecera sale igual en todas
+               las hojas sin trucos frágiles de posicionamiento. -->
+          <table class="print-table">
+            <thead>
+              <tr><td>
+                <div class="poster-header">
+                  <img src="icons/escudo-levante.png" alt="Escudo Levante UD" class="poster-crest">
+                  <div>
+                    <h2>Informe Semanal — Competitiva Interna Juvenil A</h2>
+                    <p id="informeSubtitulo"></p>
+                  </div>
+                </div>
+              </td></tr>
+            </thead>
+            <tbody>
+              <tr><td>
 
-          <div class="poster-section split-section">
-            <div class="split-col split-exentos">
-              <h3 class="poster-title split-title-exentos">NO Recogen Portería</h3>
-              <ul class="split-list" id="posterExentos"></ul>
-            </div>
-            <div class="split-col split-asignados">
-              <h3 class="poster-title split-title-asignados">SÍ Recogen Portería</h3>
-              <ul class="split-list" id="posterAsignados"></ul>
-            </div>
-          </div>
+                <div class="poster-section split-section">
+                  <div class="split-col split-exentos">
+                    <h3 class="poster-title split-title-exentos">NO Recogen Portería</h3>
+                    <ul class="split-list" id="posterExentos"></ul>
+                  </div>
+                  <div class="split-col split-asignados">
+                    <h3 class="poster-title split-title-asignados">SÍ Recogen Portería</h3>
+                    <ul class="split-list" id="posterAsignados"></ul>
+                  </div>
+                </div>
 
-          <div class="poster-section">
-            <h3 class="poster-title">🏆 Top 5 de la semana</h3>
-            <ol class="poster-top5" id="posterTop5Semanal"></ol>
-          </div>
+                <div class="poster-section">
+                  <h3 class="poster-title">🏆 Top 5 de la semana</h3>
+                  <ol class="poster-top5" id="posterTop5Semanal"></ol>
+                </div>
 
-          <div class="poster-section">
-            <h3 class="poster-title">📅 Top 5 del mes</h3>
-            <ol class="poster-top5" id="posterTop5Mensual"></ol>
-          </div>
+                <div class="poster-section">
+                  <h3 class="poster-title">📅 Top 5 del mes</h3>
+                  <ol class="poster-top5" id="posterTop5Mensual"></ol>
+                </div>
 
-          <div class="poster-section">
-            <h3 class="poster-title">🏅 Top 5 de la temporada</h3>
-            <ol class="poster-top5" id="posterTop5Anual"></ol>
-          </div>
+                <div class="poster-section">
+                  <h3 class="poster-title">🏅 Top 5 de la temporada</h3>
+                  <ol class="poster-top5" id="posterTop5Anual"></ol>
+                </div>
 
-          <div class="poster-section">
-            <h3 class="poster-title">📈 Evolución de los líderes de la temporada</h3>
-            <div class="chart-wrap poster-chart"><canvas id="chartInformeEvolucion"></canvas></div>
-          </div>
+                <div class="poster-section">
+                  <h3 class="poster-title">📈 Evolución de los líderes de la temporada</h3>
+                  <div class="chart-wrap poster-chart"><canvas id="chartInformeEvolucion"></canvas></div>
+                </div>
+
+              </td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
 
     <div id="tabRankings" class="tab-panel hidden">
       <div class="card">
-        <div class="print-header">
-          <img src="icons/escudo-levante.png" alt="Escudo Levante UD" class="print-crest">
-          <div>
-            <h2>Competitiva Interna Juvenil A</h2>
-            <p id="printSubtitleRankings"></p>
-          </div>
-        </div>
-        <label>Mes</label>
-        <select id="selectMes"></select>
-        <button type="button" id="btnDescargarPdfRankings" class="btn-secundario">Descargar PDF</button>
-        <div class="chart-wrap"><canvas id="chartMensual"></canvas></div>
-        <h3>Top 5 del mes</h3>
-        <ol id="top5Mensual"></ol>
-        <h3>Ranking del mes — todos los jugadores</h3>
-        <div id="tablaRankingMensual" class="table-scroll"></div>
-        <h3>Ranking anual acumulado</h3>
-        <div class="chart-wrap"><canvas id="chartAnual"></canvas></div>
-        <h3>Top 5 del año</h3>
-        <ol id="top5Anual"></ol>
-        <h3>Ranking anual — todos los jugadores</h3>
-        <div id="tablaRankingAnual" class="table-scroll"></div>
+        <table class="print-table">
+          <thead>
+            <tr><td>
+              <div class="print-header">
+                <img src="icons/escudo-levante.png" alt="Escudo Levante UD" class="print-crest">
+                <div>
+                  <h2>Competitiva Interna Juvenil A</h2>
+                  <p id="printSubtitleRankings"></p>
+                </div>
+              </div>
+            </td></tr>
+          </thead>
+          <tbody>
+            <tr><td>
+              <label>Mes</label>
+              <select id="selectMes"></select>
+              <button type="button" id="btnDescargarPdfRankings" class="btn-secundario">Descargar PDF</button>
+              <div class="chart-wrap"><canvas id="chartMensual"></canvas></div>
+              <h3>Top 5 del mes</h3>
+              <ol id="top5Mensual"></ol>
+              <h3>Ranking del mes — todos los jugadores</h3>
+              <div id="tablaRankingMensual" class="table-scroll"></div>
+              <h3>Ranking anual acumulado</h3>
+              <div class="chart-wrap"><canvas id="chartAnual"></canvas></div>
+              <h3>Top 5 del año</h3>
+              <ol id="top5Anual"></ol>
+              <h3>Ranking anual — todos los jugadores</h3>
+              <div id="tablaRankingAnual" class="table-scroll"></div>
+            </td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
     <div id="tabPerfil" class="tab-panel hidden">
       <div class="card">
-        <div class="print-header">
-          <img src="icons/escudo-levante.png" alt="Escudo Levante UD" class="print-crest">
-          <div>
-            <h2>Competitiva Interna Juvenil A</h2>
-            <p id="printSubtitlePerfil"></p>
-          </div>
-        </div>
-        <label>Jugador</label>
-        <select id="selectPerfilJugador"></select>
+        <table class="print-table">
+          <thead>
+            <tr><td>
+              <div class="print-header">
+                <img src="icons/escudo-levante.png" alt="Escudo Levante UD" class="print-crest">
+                <div>
+                  <h2>Competitiva Interna Juvenil A</h2>
+                  <p id="printSubtitlePerfil"></p>
+                </div>
+              </div>
+            </td></tr>
+          </thead>
+          <tbody>
+            <tr><td>
+              <label>Jugador</label>
+              <select id="selectPerfilJugador"></select>
 
-        <div id="perfilContenido" class="hidden">
-          <button type="button" id="btnDescargarPdfPerfil" class="btn-secundario">Descargar PDF</button>
-          <h3>Evolución de puntos por semana</h3>
-          <div class="chart-wrap"><canvas id="chartPerfilEvolucion"></canvas></div>
+              <div id="perfilContenido" class="hidden">
+                <button type="button" id="btnDescargarPdfPerfil" class="btn-secundario">Descargar PDF</button>
+                <h3>Evolución de puntos por semana</h3>
+                <div class="chart-wrap"><canvas id="chartPerfilEvolucion"></canvas></div>
 
-          <h3>Resumen anual</h3>
-          <div id="perfilAnualResumen"></div>
+                <h3>Resumen anual</h3>
+                <div id="perfilAnualResumen"></div>
 
-          <h3>Detalle mensual</h3>
-          <div id="tablaPerfilMensual" class="table-scroll"></div>
+                <h3>Detalle mensual</h3>
+                <div id="tablaPerfilMensual" class="table-scroll"></div>
 
-          <h3>Detalle semanal</h3>
-          <div id="tablaPerfilSemanal" class="table-scroll"></div>
-        </div>
-        <p id="perfilSinDatos" class="msg hidden">Este jugador todavía no tiene puntuaciones registradas.</p>
+                <h3>Detalle semanal</h3>
+                <div id="tablaPerfilSemanal" class="table-scroll"></div>
+              </div>
+              <p id="perfilSinDatos" class="msg hidden">Este jugador todavía no tiene puntuaciones registradas.</p>
+            </td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
