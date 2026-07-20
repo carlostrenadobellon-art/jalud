@@ -116,3 +116,20 @@ table.grid th.sortable {
 }
 table.grid th.sortable:hover { background: #253046; }
 table.grid th.sortable.active { color: var(--accent); }
+
+.stat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin-top: .75rem;
+}
+.stat-tile {
+  flex: 1 1 7rem;
+  background: #0b1220;
+  border: 1px solid #334155;
+  border-radius: var(--radius);
+  padding: .75rem;
+  text-align: center;
+}
+.stat-tile .valor { font-size: 1.4rem; font-weight: 700; color: var(--accent); }
+.stat-tile .etiqueta { font-size: .75rem; color: var(--muted); margin-top: .2rem; }

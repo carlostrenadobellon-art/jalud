@@ -41,6 +41,7 @@
     <nav class="tabs">
       <button data-tab="entrada" class="tab-btn active">Entrada semanal</button>
       <button data-tab="rankings" class="tab-btn">Rankings</button>
+      <button data-tab="perfil" class="tab-btn">Perfil jugador</button>
       <button data-tab="jugadores" class="tab-btn">Jugadores</button>
     </nav>
 
@@ -67,6 +68,28 @@
         <ol id="top5Anual"></ol>
         <h3>Ranking anual — todos los jugadores</h3>
         <div id="tablaRankingAnual" class="table-scroll"></div>
+      </div>
+    </div>
+
+    <div id="tabPerfil" class="tab-panel hidden">
+      <div class="card">
+        <label>Jugador</label>
+        <select id="selectPerfilJugador"></select>
+
+        <div id="perfilContenido" class="hidden">
+          <h3>Evolución de puntos por semana</h3>
+          <div class="chart-wrap"><canvas id="chartPerfilEvolucion"></canvas></div>
+
+          <h3>Resumen anual</h3>
+          <div id="perfilAnualResumen"></div>
+
+          <h3>Detalle mensual</h3>
+          <div id="tablaPerfilMensual" class="table-scroll"></div>
+
+          <h3>Detalle semanal</h3>
+          <div id="tablaPerfilSemanal" class="table-scroll"></div>
+        </div>
+        <p id="perfilSinDatos" class="msg hidden">Este jugador todavía no tiene puntuaciones registradas.</p>
       </div>
     </div>
 

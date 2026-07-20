@@ -141,6 +141,7 @@
       inp.addEventListener('click', function () { this.showPicker && this.showPicker(); });
     });
     cargarJugadoresParaBaja();
+    initPerfilJugador();
 
     $('#formAlta').addEventListener('submit', (e) => {
       e.preventDefault();
@@ -210,6 +211,106 @@
         sel.appendChild(opt);
       });
     });
+  }
+
+  // ---------- Perfil de jugador ----------
+
+  let chartPerfilEvolucion;
+  let perfilInit = false;
+
+  function initPerfilJugador() {
+    if (perfilInit) return;
+    perfilInit = true;
+
+    apiGet('jugadoresTodos').then((res) => {
+      if (!res.ok) return;
+      const sel = $('#selectPerfilJugador');
+      sel.innerHTML = '';
+      res.jugadores.forEach((j) => {
+        const opt = document.createElement('option');
+        opt.value = j.nombre;
+        opt.textContent = j.nombre + (j.fechaBaja ? ' (baja)' : '');
+        sel.appendChild(opt);
+      });
+      if (res.jugadores.length > 0) cargarPerfilJugador(sel.value);
+    });
+
+    $('#selectPerfilJugador').addEventListener('change', (e) => cargarPerfilJugador(e.target.value));
+  }
+
+  function cargarPerfilJugador(jugador) {
+    if (!jugador) return;
+    apiGet('perfilJugador', { jugador }).then((res) => {
+      if (!res.ok) return;
+
+      const sinDatos = res.semanas.length === 0 && res.meses.length === 0 && !res.anual;
+      $('#perfilContenido').classList.toggle('hidden', sinDatos);
+      $('#perfilSinDatos').classList.toggle('hidden', !sinDatos);
+      if (sinDatos) return;
+
+      chartPerfilEvolucion = pintarChartEvolucion(res.semanas, chartPerfilEvolucion);
+      pintarResumenAnual(res.anual);
+      pintarTablaPerfilMensual(res.meses);
+      pintarTablaPerfilSemanal(res.semanas);
+    });
+  }
+
+  function pintarChartEvolucion(semanas, existente) {
+    if (existente) existente.destroy();
+    return new Chart($('#chartPerfilEvolucion'), {
+      type: 'line',
+      data: {
+        labels: semanas.map((s) => 'S' + s.numSemana),
+        datasets: [{
+          label: 'Puntos',
+          data: semanas.map((s) => s.puntosTotales),
+          borderColor: '#38bdf8',
+          backgroundColor: 'rgba(56,189,248,.2)',
+          tension: .3,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { x: { ticks: { color: '#94a3b8' } }, y: { ticks: { color: '#94a3b8' } } },
+        plugins: { legend: { display: false } }
+      }
+    });
+  }
+
+  function pintarResumenAnual(anual) {
+    const el = $('#perfilAnualResumen');
+    if (!anual) { el.innerHTML = '<p>Sin datos todavía.</p>'; return; }
+    el.innerHTML = '<div class="stat-row">'
+      + statTile_(anual.puntosTotales, 'Puntos')
+      + statTile_(anual.numTareas, 'Tareas')
+      + statTile_(anual.promedio.toFixed(2), 'Promedio')
+      + statTile_('#' + anual.posicion + ' / ' + anual.deTotal, 'Posición anual')
+      + '</div>';
+  }
+
+  function statTile_(valor, etiqueta) {
+    return '<div class="stat-tile"><div class="valor">' + valor + '</div><div class="etiqueta">' + etiqueta + '</div></div>';
+  }
+
+  function pintarTablaPerfilMensual(meses) {
+    let html = '<table class="grid"><thead><tr><th>Mes</th><th>Puntos</th><th>Tareas</th><th>Promedio</th><th>Posición</th></tr></thead><tbody>';
+    meses.forEach((m) => {
+      html += '<tr><td class="name">' + formatMesLabel_(m.mes) + '</td><td>' + m.puntosTotales + '</td><td>' + m.numTareas
+        + '</td><td>' + m.promedio.toFixed(2) + '</td><td>#' + m.posicion + ' / ' + m.deTotal + '</td></tr>';
+    });
+    html += '</tbody></table>';
+    $('#tablaPerfilMensual').innerHTML = html;
+  }
+
+  function pintarTablaPerfilSemanal(semanas) {
+    let html = '<table class="grid"><thead><tr><th>Semana</th><th>Fechas</th><th>Puntos</th><th>Tareas</th><th>Promedio</th><th>Posición</th></tr></thead><tbody>';
+    semanas.forEach((s) => {
+      html += '<tr><td class="name">Semana ' + s.numSemana + '</td><td>' + s.fechaInicio + ' a ' + s.fechaFin + '</td><td>' + s.puntosTotales
+        + '</td><td>' + s.numTareas + '</td><td>' + s.promedio.toFixed(2) + '</td><td>#' + s.posicion + ' / ' + s.deTotal + '</td></tr>';
+    });
+    html += '</tbody></table>';
+    $('#tablaPerfilSemanal').innerHTML = html;
   }
 
   let semanaEnCurso = null;
