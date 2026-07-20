@@ -397,6 +397,16 @@
     });
   }
 
+  /** Fila de la cuadrícula de entrada: checkbox "participa" (activado por defecto) + input de puntos. */
+  function filaJugadorEntrada_(nombre, esInvitado) {
+    const etiqueta = esInvitado ? nombre + ' <em>(invitado)</em>' : nombre;
+    return '<tr>'
+      + '<td class="name">' + etiqueta + '</td>'
+      + '<td class="col-participa"><input type="checkbox" class="chk-participa" data-jugador="' + nombre + '" checked></td>'
+      + '<td><input type="number" step="any" data-jugador="' + nombre + '"></td>'
+      + '</tr>';
+  }
+
   function pintarGrid(data) {
     const { semana, jugadores, puntuaciones } = data;
 
@@ -421,11 +431,18 @@
     html += '<h3 id="tituloFormTarea">Nueva tarea</h3>';
     html += '<label>Nombre de la tarea</label><input type="text" id="nuevaTareaNombre" placeholder="Ej: Rondo, Test físico...">';
     html += '<label>Fecha</label><input type="date" id="nuevaTareaFecha" value="' + fechaPorDefecto + '" min="' + semana.fechaInicio + '" max="' + semana.fechaFin + '">';
-    html += '<table class="grid" id="tablaEntrada"><thead><tr><th>Jugador</th><th>Puntos</th></tr></thead><tbody>';
+    html += '<table class="grid" id="tablaEntrada"><thead><tr><th>Jugador</th><th>Participa</th><th>Puntos</th></tr></thead><tbody>';
     jugadores.forEach((j) => {
-      html += '<tr><td class="name">' + j.nombre + '</td><td><input type="number" step="any" data-jugador="' + j.nombre + '"></td></tr>';
+      html += filaJugadorEntrada_(j.nombre, false);
     });
     html += '</tbody></table>';
+
+    html += '<label>Añadir jugador invitado (solo para esta tarea, no hace falta darlo de alta)</label>';
+    html += '<div class="guest-add-row">'
+      + '<input type="text" id="inputInvitado" placeholder="Nombre del jugador invitado">'
+      + '<button type="button" id="btnAñadirInvitado" style="background:#334155;color:#e2e8f0;">Añadir a la lista</button>'
+      + '</div>';
+
     html += '<button id="btnGuardarTarea">Guardar tarea</button>';
     html += '<button type="button" id="btnNuevaTarea" style="background:#334155;color:#e2e8f0;">Empezar tarea nueva (limpiar)</button>';
     html += '<p id="entradaMsg" class="msg hidden"></p>';
@@ -452,16 +469,35 @@
     // Clic en cualquier punto del campo de fecha abre el calendario nativo (no solo en el icono).
     $('#nuevaTareaFecha').addEventListener('click', function () { this.showPicker && this.showPicker(); });
 
+    // Un cambio en el checkbox "participa" activa/desactiva el input de puntos de esa fila.
+    // Delegado en la tabla (no en cada checkbox) para que funcione también con filas de
+    // invitados añadidas después de pintar la cuadrícula.
+    $('#tablaEntrada').addEventListener('change', (e) => {
+      if (!e.target.classList.contains('chk-participa')) return;
+      const input = e.target.closest('tr').querySelector('input[type="number"]');
+      input.disabled = !e.target.checked;
+      if (!e.target.checked) input.value = '';
+    });
+
+    $('#btnAñadirInvitado').addEventListener('click', () => {
+      const nombre = $('#inputInvitado').value.trim().toUpperCase();
+      if (!nombre) return;
+      const yaExiste = $$('#tablaEntrada input[data-jugador]').some((inp) => inp.dataset.jugador === nombre);
+      if (yaExiste) { alert('Ese jugador ya está en la lista.'); return; }
+      $('#tablaEntrada tbody').insertAdjacentHTML('beforeend', filaJugadorEntrada_(nombre, true));
+      $('#inputInvitado').value = '';
+    });
+
     $('#btnGuardarTarea').addEventListener('click', () => {
       const tarea = $('#nuevaTareaNombre').value.trim();
       const fecha = $('#nuevaTareaFecha').value;
       if (!tarea || !fecha) { alert('Falta el nombre de la tarea o la fecha'); return; }
 
-      const puntuacionesLote = $$('#tablaEntrada input[data-jugador]')
-        .filter((inp) => inp.value !== '')
+      const puntuacionesLote = $$('#tablaEntrada input[type="number"][data-jugador]')
+        .filter((inp) => !inp.disabled && inp.value !== '')
         .map((inp) => ({ jugador: inp.dataset.jugador, tarea, puntos: Number(inp.value) }));
 
-      if (puntuacionesLote.length === 0) { alert('Introduce al menos una puntuación'); return; }
+      if (puntuacionesLote.length === 0) { alert('Introduce al menos una puntuación (o marca a alguien como no participa).'); return; }
 
       apiPost('guardarPuntosLote', { semana: semanaEnCurso, fecha, puntuaciones: puntuacionesLote }).then((res) => {
         const msg = $('#entradaMsg');
@@ -488,10 +524,12 @@
           .filter((p) => p.tarea === tarea && p.fecha === fecha)
           .forEach((p) => { puntosPorJugador[p.jugador] = p.puntos; });
 
-        $$('#tablaEntrada input[data-jugador]').forEach((inp) => {
+        $$('#tablaEntrada input[type="number"][data-jugador]').forEach((inp) => {
           const v = puntosPorJugador[inp.dataset.jugador];
+          inp.disabled = false;
           inp.value = (v === undefined) ? '' : v;
         });
+        $$('#tablaEntrada input.chk-participa').forEach((chk) => { chk.checked = true; });
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
       });
@@ -705,11 +743,21 @@
     $('#informeSubtitulo').textContent = 'Semana ' + data.semana.numSemana + ' (' + data.semana.fechaInicio
       + ' a ' + data.semana.fechaFin + ') · ' + formatMesLabel_(data.mes);
 
+    pintarListaMitad_('#posterExentos', data.mitades.exentos);
+    pintarListaMitad_('#posterAsignados', data.mitades.asignados);
+
     pintarPosterTop5_('#posterTop5Semanal', data.top5Semanal);
     pintarPosterTop5_('#posterTop5Mensual', data.top5Mensual);
     pintarPosterTop5_('#posterTop5Anual', data.top5Anual);
 
     chartInformeEvolucion = pintarChartEvolucionInforme_(data.evolucion, chartInformeEvolucion);
+  }
+
+  function pintarListaMitad_(sel, lista) {
+    if (lista.length === 0) { $(sel).innerHTML = '<li>Sin datos.</li>'; return; }
+    $(sel).innerHTML = lista.map((r) =>
+      '<li><span class="nombre">' + r.jugador + '</span><span class="puntos">' + r.puntosTotales + ' pts</span></li>'
+    ).join('');
   }
 
   function pintarPosterTop5_(sel, top5) {

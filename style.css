@@ -128,6 +128,21 @@ table.grid input {
   text-align: center;
 }
 table.grid td.name { text-align: left; white-space: nowrap; }
+table.grid td.name em { color: var(--muted); font-style: normal; font-size: .8rem; }
+
+table.grid input[type="checkbox"] {
+  width: 1.2rem;
+  height: 1.2rem;
+  padding: 0;
+  margin: 0 auto;
+  accent-color: var(--accent);
+}
+table.grid input[type="number"]:disabled { opacity: .35; }
+table.grid td.col-participa { width: 4.5rem; }
+
+.guest-add-row { display: flex; gap: .5rem; align-items: flex-start; }
+.guest-add-row input { margin-top: 0; }
+.guest-add-row button { margin-top: 0; width: auto; white-space: nowrap; }
 
 .table-scroll { overflow-x: auto; margin-top: 1rem; }
 table.grid th.sortable {
@@ -226,6 +241,27 @@ table.grid th.sortable.active { color: var(--accent); }
 .poster-top5 li .puntos { color: var(--accent); font-size: 1.05rem; white-space: nowrap; }
 
 .poster-chart { height: 260px; background: #fff; }
+
+/* Reparto de tareas de la semana siguiente. Colores sutiles (pensados para
+   imprimir): verde muy claro para quien queda exento, rojo muy claro para
+   quien tiene la tarea asignada. Nunca se rotulan como "ganadores/perdedores". */
+.split-section { display: flex; flex-wrap: wrap; gap: 1rem; }
+.split-col { flex: 1 1 220px; min-width: 200px; }
+.split-title-exentos { color: #2f8f4e; border-left-color: #2f8f4e; }
+.split-title-asignados { color: #b3261e; border-left-color: #b3261e; }
+.split-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: .35rem; }
+.split-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: .5rem;
+  padding: .45rem .65rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: .92rem;
+}
+.split-exentos .split-list li { background: #eef7f0; color: #1e5631; }
+.split-asignados .split-list li { background: #fbeceb; color: #7a1f18; }
+.split-list li .puntos { font-weight: 500; opacity: .8; }
 
 /* ---------- Impresión (Descargar PDF) ---------- */
 
