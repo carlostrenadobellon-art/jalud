@@ -55,14 +55,18 @@
     <div id="tabRankings" class="tab-panel hidden">
       <div class="card">
         <label>Mes</label>
-        <input type="month" id="selectMes">
+        <select id="selectMes"></select>
         <div class="chart-wrap"><canvas id="chartMensual"></canvas></div>
         <h3>Top 5 del mes</h3>
         <ol id="top5Mensual"></ol>
+        <h3>Ranking del mes — todos los jugadores</h3>
+        <div id="tablaRankingMensual" class="table-scroll"></div>
         <h3>Ranking anual acumulado</h3>
         <div class="chart-wrap"><canvas id="chartAnual"></canvas></div>
         <h3>Top 5 del año</h3>
         <ol id="top5Anual"></ol>
+        <h3>Ranking anual — todos los jugadores</h3>
+        <div id="tablaRankingAnual" class="table-scroll"></div>
       </div>
     </div>
 
@@ -91,7 +95,7 @@
     <div class="card">
       <h2 id="jugadorSaludo"></h2>
       <label>Mes</label>
-      <input type="month" id="jugadorSelectMes">
+      <select id="jugadorSelectMes"></select>
       <div class="chart-wrap"><canvas id="chartJugadorMensual"></canvas></div>
       <h3>Top 5 del mes</h3>
       <ol id="jugadorTop5Mensual"></ol>

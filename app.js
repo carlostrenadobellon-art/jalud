@@ -114,8 +114,10 @@
       if (!res.ok) return;
       const hoy = new Date().toISOString().slice(0, 10);
       let semanaActual = res.semanas[0].numSemana;
+      const mesesSet = new Set();
       res.semanas.forEach((s) => {
         if (hoy >= s.fechaInicio && hoy <= s.fechaFin) semanaActual = s.numSemana;
+        mesesSet.add(s.mesAsignado);
         const opt = document.createElement('option');
         opt.value = s.numSemana;
         opt.textContent = 'Semana ' + s.numSemana + ' (' + s.fechaInicio + ' a ' + s.fechaFin + ')';
@@ -123,9 +125,14 @@
       });
       $('#selectSemana').value = semanaActual;
       cargarSemana(semanaActual);
+
+      const meses = Array.from(mesesSet).sort();
+      const mesActual = poblarSelectMeses($('#selectMes'), meses, hoy.slice(0, 7));
+      cargarRankings(mesActual);
     });
 
     $('#selectSemana').addEventListener('change', (e) => cargarSemana(e.target.value));
+    $('#selectMes').addEventListener('change', () => cargarRankings($('#selectMes').value));
 
     const hoyISO = new Date().toISOString().slice(0, 10);
     $('#altaFecha').value = hoyISO;
@@ -157,11 +164,31 @@
         if (res.ok) cargarJugadoresParaBaja();
       });
     });
+  }
 
-    const mesActual = new Date().toISOString().slice(0, 7);
-    $('#selectMes').value = mesActual;
-    $('#selectMes').addEventListener('change', () => cargarRankings($('#selectMes').value));
-    cargarRankings(mesActual);
+  /**
+   * Rellena un <select> con los meses de la temporada (formato "Julio 2026"),
+   * y devuelve el mes que debería quedar seleccionado (el mes actual si
+   * pertenece a la temporada, si no el último disponible).
+   */
+  function poblarSelectMeses(selectEl, meses, mesPreferido) {
+    selectEl.innerHTML = '';
+    meses.forEach((m) => {
+      const opt = document.createElement('option');
+      opt.value = m;
+      opt.textContent = formatMesLabel_(m);
+      selectEl.appendChild(opt);
+    });
+    const mesElegido = meses.includes(mesPreferido) ? mesPreferido : meses[meses.length - 1];
+    selectEl.value = mesElegido;
+    return mesElegido;
+  }
+
+  function formatMesLabel_(mesISO) {
+    const [y, m] = mesISO.split('-').map(Number);
+    const d = new Date(y, m - 1, 1);
+    const label = d.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+    return label.charAt(0).toUpperCase() + label.slice(1);
   }
 
   function mostrarMsgJugadores(texto) {
@@ -305,11 +332,13 @@
       if (!res.ok) return;
       chartMensual = pintarChart('chartMensual', chartMensual, res.ranking);
       pintarTop5('#top5Mensual', res.ranking.slice(0, 5));
+      pintarTablaRanking('tablaRankingMensual', res.ranking, 'mensual');
     });
     apiGet('rankingAnual').then((res) => {
       if (!res.ok) return;
       chartAnual = pintarChart('chartAnual', chartAnual, res.ranking);
       pintarTop5('#top5Anual', res.ranking.slice(0, 5));
+      pintarTablaRanking('tablaRankingAnual', res.ranking, 'anual');
     });
   }
 
@@ -331,7 +360,64 @@
   }
 
   function pintarTop5(sel, top5) {
-    $(sel).innerHTML = top5.map((r) => '<li>' + r.jugador + ' — ' + r.puntosTotales + ' pts</li>').join('') || '<li>Sin datos</li>';
+    $(sel).innerHTML = top5.map((r) =>
+      '<li>' + r.jugador + ' — ' + r.puntosTotales + ' pts (promedio ' + r.promedio.toFixed(2) + ')</li>'
+    ).join('') || '<li>Sin datos</li>';
+  }
+
+  // Estado de ordenación de cada tabla, para recordar qué columna está activa
+  // al recargar los datos (cambio de mes, etc.).
+  const sortState = {
+    mensual: { key: 'puntosTotales', asc: false },
+    anual: { key: 'puntosTotales', asc: false }
+  };
+
+  const COLUMNAS_RANKING = [
+    { key: 'jugador', label: 'Jugador' },
+    { key: 'puntosTotales', label: 'Puntos' },
+    { key: 'numTareas', label: 'Nº Tareas' },
+    { key: 'promedio', label: 'Promedio' }
+  ];
+
+  function pintarTablaRanking(containerId, ranking, tipo) {
+    const estado = sortState[tipo];
+    const ordenado = ranking.slice().sort((a, b) => {
+      let va = a[estado.key], vb = b[estado.key];
+      if (typeof va === 'string') { va = va.toLowerCase(); vb = vb.toLowerCase(); }
+      if (va < vb) return estado.asc ? -1 : 1;
+      if (va > vb) return estado.asc ? 1 : -1;
+      return 0;
+    });
+
+    let html = '<table class="grid ranking-table"><thead><tr>';
+    COLUMNAS_RANKING.forEach((c) => {
+      const activa = c.key === estado.key;
+      const flecha = activa ? (estado.asc ? ' ▲' : ' ▼') : '';
+      html += '<th class="sortable' + (activa ? ' active' : '') + '" data-key="' + c.key + '">' + c.label + flecha + '</th>';
+    });
+    html += '</tr></thead><tbody>';
+    if (ordenado.length === 0) {
+      html += '<tr><td colspan="4">Sin datos todavía.</td></tr>';
+    }
+    ordenado.forEach((r) => {
+      html += '<tr><td class="name">' + r.jugador + '</td><td>' + r.puntosTotales + '</td><td>' + r.numTareas + '</td><td>' + r.promedio.toFixed(2) + '</td></tr>';
+    });
+    html += '</tbody></table>';
+
+    const container = $('#' + containerId);
+    container.innerHTML = html;
+    container.querySelectorAll('th.sortable').forEach((th) => {
+      th.addEventListener('click', () => {
+        const key = th.dataset.key;
+        if (estado.key === key) {
+          estado.asc = !estado.asc;
+        } else {
+          estado.key = key;
+          estado.asc = (key === 'jugador');
+        }
+        pintarTablaRanking(containerId, ranking, tipo);
+      });
+    });
   }
 
   // ---------- Vista Jugador ----------
@@ -345,10 +431,15 @@
 
     $('#jugadorSaludo').textContent = 'Hola, ' + session.nombre;
 
-    const mesActual = new Date().toISOString().slice(0, 7);
-    $('#jugadorSelectMes').value = mesActual;
+    apiGet('calendario').then((res) => {
+      if (!res.ok) return;
+      const hoy = new Date().toISOString().slice(0, 7);
+      const meses = Array.from(new Set(res.semanas.map((s) => s.mesAsignado))).sort();
+      const mesActual = poblarSelectMeses($('#jugadorSelectMes'), meses, hoy);
+      cargarRankingsJugador(mesActual);
+    });
+
     $('#jugadorSelectMes').addEventListener('change', () => cargarRankingsJugador($('#jugadorSelectMes').value));
-    cargarRankingsJugador(mesActual);
   }
 
   function cargarRankingsJugador(mes) {

@@ -107,3 +107,12 @@ table.grid input {
   text-align: center;
 }
 table.grid td.name { text-align: left; white-space: nowrap; }
+
+.table-scroll { overflow-x: auto; margin-top: 1rem; }
+table.grid th.sortable {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+table.grid th.sortable:hover { background: #253046; }
+table.grid th.sortable.active { color: var(--accent); }
