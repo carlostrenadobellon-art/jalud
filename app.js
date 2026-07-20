@@ -264,8 +264,8 @@
         datasets: [{
           label: 'Puntos',
           data: semanas.map((s) => s.puntosTotales),
-          borderColor: '#38bdf8',
-          backgroundColor: 'rgba(56,189,248,.2)',
+          borderColor: '#2f8fd1',
+          backgroundColor: 'rgba(13,108,176,.25)',
           tension: .3,
           fill: true
         }]
@@ -450,7 +450,7 @@
       type: 'bar',
       data: {
         labels: top.map((r) => r.jugador),
-        datasets: [{ label: 'Puntos', data: top.map((r) => r.puntosTotales), backgroundColor: '#38bdf8' }]
+        datasets: [{ label: 'Puntos', data: top.map((r) => r.puntosTotales), backgroundColor: '#2f8fd1' }]
       },
       options: {
         responsive: true, maintainAspectRatio: false,
