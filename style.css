@@ -281,9 +281,14 @@ table.grid th.sortable.active { color: var(--accent); }
   vertical-align: top;
 }
 
-@media print {
-  @page { margin: 1.6cm; }
+/* @page solo es un extra por si el navegador lo respeta — el margen real
+   y garantizado es el padding de abajo, puesto directamente en las celdas
+   de la tabla imprimible. Así sale bien pase lo que pase esté configurado
+   en "Márgenes" del diálogo de impresión (Predeterminado/Ninguno/Mínimo),
+   sin depender de que el usuario toque nada ahí. */
+@page { margin: 1.6cm; }
 
+@media print {
   html, body {
     background: #fff !important;
     height: auto !important;
@@ -301,13 +306,26 @@ table.grid th.sortable.active { color: var(--accent); }
     box-shadow: none;
   }
 
+  /* Margen de seguridad real: puesto directamente en las celdas de la
+     tabla, no en @page. La cabecera va en <thead>, que se repite entero en
+     cada página, así que este padding se aplica de nuevo en cada una — a
+     diferencia de un padding en una caja que fluye y se corta entre
+     páginas, que solo se aplicaría una vez. Sale bien tenga Chrome puesto
+     "Márgenes: Ninguno", "Mínimo" o "Predeterminado". */
+  .printing-target .print-table > thead > tr > td {
+    padding: 1.1cm 1.1cm 0 1.1cm;
+  }
+  .printing-target .print-table > tbody > tr > td {
+    padding: .6cm 1.1cm 1.3cm 1.1cm;
+  }
+
   .printing-target .print-header,
   .printing-target .poster-header {
     display: flex;
     align-items: center;
     gap: 1rem;
     background: #fff;
-    margin: 0 0 1rem;
+    margin: 0;
     padding-bottom: .75rem;
     border-bottom: 3px solid;
     border-image: linear-gradient(90deg, #0d6cb0, #b51e45, #f5b400) 1;
