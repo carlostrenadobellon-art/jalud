@@ -268,6 +268,15 @@ table.grid th.sortable.active { color: var(--accent); }
 .print-header { display: none; }
 
 @media print {
+  /* El margen superior de la página reserva sitio para la cabecera en TODAS
+     las hojas (a diferencia de un padding-top en el contenido, que solo se
+     aplicaría una vez al principio del documento, no en cada salto de
+     página). El resto de márgenes son la "zona de seguridad" normal. */
+  @page {
+    margin: 1.6cm;
+    margin-top: 3.4cm;
+  }
+
   html, body {
     background: #fff !important;
     height: auto !important;
@@ -283,17 +292,15 @@ table.grid th.sortable.active { color: var(--accent); }
     background: #fff !important;
     color: #111 !important;
     box-shadow: none;
-    /* Deja hueco arriba para la cabecera fija (ver más abajo), que al ser
-       "position: fixed" ya no ocupa espacio en el flujo normal. */
-    padding-top: 108px;
   }
 
   /* Cabecera (escudo + título) fija: el navegador la repite en cada página
-     impresa, así que sale igual en todas las hojas del informe. */
+     impresa, dentro del margen superior reservado arriba. No pegada al
+     borde físico del papel, para no perderse en zonas no imprimibles. */
   .printing-target .print-header,
   .printing-target .poster-header {
     position: fixed;
-    top: 0;
+    top: .5cm;
     left: 0;
     right: 0;
     z-index: 10;
@@ -301,17 +308,17 @@ table.grid th.sortable.active { color: var(--accent); }
     align-items: center;
     gap: 1rem;
     background: #fff;
-    margin: 0 0 1rem;
-    padding-bottom: .75rem;
+    margin: 0;
+    padding-bottom: .6rem;
     border-bottom: 3px solid;
     border-image: linear-gradient(90deg, #0d6cb0, #b51e45, #f5b400) 1;
   }
   .printing-target .print-crest,
-  .printing-target .poster-crest { height: 60px; width: auto; }
+  .printing-target .poster-crest { height: 42px; width: auto; }
   .printing-target .print-header h2,
-  .printing-target .poster-header h2 { color: #0d6cb0; margin: 0; }
+  .printing-target .poster-header h2 { color: #0d6cb0; margin: 0; font-size: 1.1rem; }
   .printing-target .print-header p,
-  .printing-target .poster-header p { color: #444; margin: .25rem 0 0; }
+  .printing-target .poster-header p { color: #444; margin: .2rem 0 0; font-size: .85rem; }
 
   .printing-target h3 { color: #b51e45; border-left-color: #b51e45; }
 
@@ -335,12 +342,29 @@ table.grid th.sortable.active { color: var(--accent); }
   .printing-target input,
   .printing-target label { display: none !important; }
 
+  /* Chrome no respeta bien "no cortar" (break-inside: avoid) dentro de
+     contenedores flex al imprimir/exportar a PDF — por eso las listas que
+     necesitan no partirse (Top 5, el reparto de tareas) pasan a bloque
+     normal solo en impresión, con margen en vez de "gap" para el espaciado. */
+  .printing-target .poster-top5,
+  .printing-target .split-list,
+  .printing-target .stat-row {
+    display: block;
+  }
+  .printing-target .poster-top5 li,
+  .printing-target .split-list li,
+  .printing-target .stat-tile {
+    margin-bottom: .5rem;
+  }
+  .printing-target .stat-tile { display: inline-block; width: 47%; margin-right: 2%; vertical-align: top; }
+
   /* No cortar bloques a la mitad entre páginas: si una sección (Top 5, el
      reparto de tareas, una tarjeta, una fila de tabla...) no cabe entera en
      lo que queda de página, pasa completa a la siguiente. */
   .printing-target .poster-section,
-  .printing-target .split-section,
-  .printing-target .stat-row,
+  .printing-target .split-col,
+  .printing-target .poster-top5 li,
+  .printing-target .split-list li,
   .printing-target .stat-tile,
   .printing-target .chart-wrap,
   .printing-target table.grid tr {
@@ -353,6 +377,4 @@ table.grid th.sortable.active { color: var(--accent); }
     break-after: avoid;
     page-break-after: avoid;
   }
-
-  @page { margin: 1.5cm; }
 }
