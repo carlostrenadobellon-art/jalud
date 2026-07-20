@@ -130,6 +130,9 @@
     const hoyISO = new Date().toISOString().slice(0, 10);
     $('#altaFecha').value = hoyISO;
     $('#bajaFecha').value = hoyISO;
+    [$('#altaFecha'), $('#bajaFecha')].forEach((inp) => {
+      inp.addEventListener('click', function () { this.showPicker && this.showPicker(); });
+    });
     cargarJugadoresParaBaja();
 
     $('#formAlta').addEventListener('submit', (e) => {
@@ -193,9 +196,10 @@
   }
 
   function pintarGrid(data) {
-    const { jugadores, puntuaciones } = data;
+    const { semana, jugadores, puntuaciones } = data;
 
-    // Resumen TOT/SES/PROM por jugador a partir de lo ya guardado esta semana.
+    // Resumen TOT/SES/PROM por jugador a partir de lo ya guardado esta semana
+    // (el backend ya deduplica jugador+tarea+fecha, así que una corrección no cuenta dos veces).
     const resumen = {};
     jugadores.forEach((j) => { resumen[j.nombre] = { tot: 0, ses: 0 }; });
     puntuaciones.forEach((p) => {
@@ -205,23 +209,31 @@
     });
 
     const tareas = Array.from(new Set(puntuaciones.map((p) => p.tarea + '|' + p.fecha)))
-      .map((k) => { const [tarea, fecha] = k.split('|'); return { tarea, fecha }; });
+      .map((k) => { const [tarea, fecha] = k.split('|'); return { tarea, fecha }; })
+      .sort((a, b) => a.fecha.localeCompare(b.fecha));
+
+    const hoyISO = new Date().toISOString().slice(0, 10);
+    const fechaPorDefecto = (hoyISO >= semana.fechaInicio && hoyISO <= semana.fechaFin) ? hoyISO : semana.fechaInicio;
 
     let html = '';
-    html += '<h3>Nueva tarea</h3>';
+    html += '<h3 id="tituloFormTarea">Nueva tarea</h3>';
     html += '<label>Nombre de la tarea</label><input type="text" id="nuevaTareaNombre" placeholder="Ej: Rondo, Test físico...">';
-    html += '<label>Fecha</label><input type="date" id="nuevaTareaFecha" value="' + new Date().toISOString().slice(0, 10) + '">';
+    html += '<label>Fecha</label><input type="date" id="nuevaTareaFecha" value="' + fechaPorDefecto + '" min="' + semana.fechaInicio + '" max="' + semana.fechaFin + '">';
     html += '<table class="grid" id="tablaEntrada"><thead><tr><th>Jugador</th><th>Puntos</th></tr></thead><tbody>';
     jugadores.forEach((j) => {
       html += '<tr><td class="name">' + j.nombre + '</td><td><input type="number" step="any" data-jugador="' + j.nombre + '"></td></tr>';
     });
     html += '</tbody></table>';
     html += '<button id="btnGuardarTarea">Guardar tarea</button>';
+    html += '<button type="button" id="btnNuevaTarea" style="background:#334155;color:#e2e8f0;">Empezar tarea nueva (limpiar)</button>';
     html += '<p id="entradaMsg" class="msg hidden"></p>';
 
     html += '<h3>Tareas registradas esta semana</h3>';
     html += tareas.length
-      ? '<ul>' + tareas.map((t) => '<li>' + t.tarea + ' (' + t.fecha + ')</li>').join('') + '</ul>'
+      ? '<ul>' + tareas.map((t) =>
+          '<li><button type="button" class="tarea-link" data-tarea="' + encodeURIComponent(t.tarea) + '" data-fecha="' + t.fecha + '">'
+          + t.tarea + ' (' + t.fecha + ') — corregir / completar</button></li>'
+        ).join('') + '</ul>'
       : '<p>Ninguna todavía.</p>';
 
     html += '<h3>Resumen de la semana</h3>';
@@ -234,6 +246,9 @@
     html += '</tbody></table>';
 
     $('#gridContainer').innerHTML = html;
+
+    // Clic en cualquier punto del campo de fecha abre el calendario nativo (no solo en el icono).
+    $('#nuevaTareaFecha').addEventListener('click', function () { this.showPicker && this.showPicker(); });
 
     $('#btnGuardarTarea').addEventListener('click', () => {
       const tarea = $('#nuevaTareaNombre').value.trim();
@@ -251,6 +266,32 @@
         msg.textContent = res.ok ? ('Guardadas ' + res.guardadas + ' puntuaciones.') : res.error;
         msg.classList.remove('hidden');
         if (res.ok) cargarSemana(semanaEnCurso);
+      });
+    });
+
+    $('#btnNuevaTarea').addEventListener('click', () => cargarSemana(semanaEnCurso));
+
+    $$('.tarea-link').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const tarea = decodeURIComponent(btn.dataset.tarea);
+        const fecha = btn.dataset.fecha;
+        $('#nuevaTareaNombre').value = tarea;
+        $('#nuevaTareaFecha').value = fecha;
+        $('#tituloFormTarea').textContent = 'Corrigiendo: ' + tarea + ' (' + fecha + ')';
+
+        // Precarga lo ya guardado para esa tarea+fecha; los jugadores sin
+        // puntuación quedan en blanco (son los que faltaban por meter).
+        const puntosPorJugador = {};
+        puntuaciones
+          .filter((p) => p.tarea === tarea && p.fecha === fecha)
+          .forEach((p) => { puntosPorJugador[p.jugador] = p.puntos; });
+
+        $$('#tablaEntrada input[data-jugador]').forEach((inp) => {
+          const v = puntosPorJugador[inp.dataset.jugador];
+          inp.value = (v === undefined) ? '' : v;
+        });
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       });
     });
   }
