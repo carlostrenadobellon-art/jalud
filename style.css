@@ -283,20 +283,35 @@ table.grid th.sortable.active { color: var(--accent); }
     background: #fff !important;
     color: #111 !important;
     box-shadow: none;
+    /* Deja hueco arriba para la cabecera fija (ver más abajo), que al ser
+       "position: fixed" ya no ocupa espacio en el flujo normal. */
+    padding-top: 108px;
   }
 
-  .printing-target .print-header {
+  /* Cabecera (escudo + título) fija: el navegador la repite en cada página
+     impresa, así que sale igual en todas las hojas del informe. */
+  .printing-target .print-header,
+  .printing-target .poster-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
     display: flex;
     align-items: center;
     gap: 1rem;
-    margin-bottom: 1rem;
+    background: #fff;
+    margin: 0 0 1rem;
     padding-bottom: .75rem;
     border-bottom: 3px solid;
     border-image: linear-gradient(90deg, #0d6cb0, #b51e45, #f5b400) 1;
   }
-  .printing-target .print-crest { height: 60px; width: auto; }
-  .printing-target .print-header h2 { color: #0d6cb0; margin: 0; }
-  .printing-target .print-header p { color: #444; margin: .25rem 0 0; }
+  .printing-target .print-crest,
+  .printing-target .poster-crest { height: 60px; width: auto; }
+  .printing-target .print-header h2,
+  .printing-target .poster-header h2 { color: #0d6cb0; margin: 0; }
+  .printing-target .print-header p,
+  .printing-target .poster-header p { color: #444; margin: .25rem 0 0; }
 
   .printing-target h3 { color: #b51e45; border-left-color: #b51e45; }
 
@@ -308,15 +323,36 @@ table.grid th.sortable.active { color: var(--accent); }
   .printing-target .stat-tile .valor { color: #0d6cb0 !important; }
   .printing-target .stat-tile .etiqueta { color: #444 !important; }
 
-  /* Los gráficos están pensados para fondo oscuro (ejes claros); en el PDF
-     nos quedamos con las tablas, que llevan los mismos datos y se leen mejor
-     impresas en blanco y negro. */
-  .printing-target .chart-wrap { display: none; }
+  /* Los gráficos de Rankings/Perfil están pensados para fondo oscuro (ejes
+     claros); en esos PDF nos quedamos con las tablas, que llevan los mismos
+     datos y se leen mejor en blanco y negro. El gráfico de evolución del
+     informe semanal sí usa colores pensados para imprimir, así que ese se
+     mantiene visible. */
+  .printing-target .chart-wrap:not(.poster-chart) { display: none; }
 
   .printing-target button,
   .printing-target select,
   .printing-target input,
   .printing-target label { display: none !important; }
+
+  /* No cortar bloques a la mitad entre páginas: si una sección (Top 5, el
+     reparto de tareas, una tarjeta, una fila de tabla...) no cabe entera en
+     lo que queda de página, pasa completa a la siguiente. */
+  .printing-target .poster-section,
+  .printing-target .split-section,
+  .printing-target .stat-row,
+  .printing-target .stat-tile,
+  .printing-target .chart-wrap,
+  .printing-target table.grid tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  /* Que un título no se quede solo al final de una página, separado de su contenido. */
+  .printing-target h2,
+  .printing-target h3 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
 
   @page { margin: 1.5cm; }
 }
