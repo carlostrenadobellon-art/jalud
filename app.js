@@ -536,7 +536,7 @@
 
   function pintarTop5(sel, top5) {
     $(sel).innerHTML = top5.map((r) =>
-      '<li>' + r.jugador + ' — ' + r.puntosTotales + ' pts (promedio ' + r.promedio.toFixed(2) + ')</li>'
+      '<li>' + r.jugador + ' — ' + r.puntosTotales + ' pts · ' + r.numTareas + ' tareas · promedio ' + r.promedio.toFixed(2) + '</li>'
     ).join('') || '<li>Sin datos</li>';
   }
 
@@ -720,7 +720,10 @@
     $(sel).innerHTML = top5.map((r, idx) => {
       const rango = idx < 3 ? 'rank-' + (idx + 1) : '';
       return '<li class="' + rango + '"><span class="medal">' + (idx + 1) + '</span>'
+        + '<div class="datos">'
         + '<span class="nombre">' + r.jugador + '</span>'
+        + '<span class="substats">' + r.numTareas + ' tareas · promedio ' + r.promedio.toFixed(2) + '</span>'
+        + '</div>'
         + '<span class="puntos">' + r.puntosTotales + ' pts</span></li>';
     }).join('');
   }

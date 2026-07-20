@@ -220,7 +220,9 @@ table.grid th.sortable.active { color: var(--accent); }
 .poster-top5 li.rank-1 .medal { background: var(--gold); color: #4a3600; }
 .poster-top5 li.rank-2 .medal { background: #b8c2cc; color: #23303a; }
 .poster-top5 li.rank-3 .medal { background: #c98a4b; color: #3a2007; }
-.poster-top5 li .nombre { flex: 1; }
+.poster-top5 li .datos { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.poster-top5 li .nombre { font-size: 1rem; }
+.poster-top5 li .substats { font-size: .78rem; color: #666; font-weight: 500; margin-top: .15rem; }
 .poster-top5 li .puntos { color: var(--accent); font-size: 1.05rem; white-space: nowrap; }
 
 .poster-chart { height: 260px; background: #fff; }
