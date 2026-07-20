@@ -154,3 +154,67 @@ table.grid th.sortable.active { color: var(--accent); }
 }
 .stat-tile .valor { font-size: 1.4rem; font-weight: 700; color: var(--accent); }
 .stat-tile .etiqueta { font-size: .75rem; color: var(--muted); margin-top: .2rem; }
+
+.btn-secundario { background: var(--accent-2); }
+
+.row-actions { display: flex; gap: .4rem; justify-content: center; }
+.row-actions button {
+  width: auto;
+  margin-top: 0;
+  padding: .35rem .6rem;
+  font-size: .8rem;
+}
+.row-actions .btn-eliminar { background: var(--error); color: #1a0b0b; }
+
+/* ---------- Impresión (Descargar PDF) ---------- */
+
+.print-header { display: none; }
+
+@media print {
+  body * { visibility: hidden; }
+  .printing-target, .printing-target * { visibility: visible; }
+  .printing-target {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: #fff !important;
+    color: #111 !important;
+    box-shadow: none;
+  }
+
+  .printing-target .print-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: .75rem;
+    border-bottom: 3px solid;
+    border-image: linear-gradient(90deg, #0d6cb0, #b51e45, #f5b400) 1;
+  }
+  .printing-target .print-crest { height: 60px; width: auto; }
+  .printing-target .print-header h2 { color: #0d6cb0; margin: 0; }
+  .printing-target .print-header p { color: #444; margin: .25rem 0 0; }
+
+  .printing-target h3 { color: #b51e45; border-left-color: #b51e45; }
+
+  .printing-target table.grid th,
+  .printing-target table.grid td { border-color: #999 !important; color: #111 !important; }
+  .printing-target table.grid th { background: #eef3f8 !important; }
+
+  .printing-target .stat-tile { background: #f4f8fc !important; border-color: #0d6cb0 !important; }
+  .printing-target .stat-tile .valor { color: #0d6cb0 !important; }
+  .printing-target .stat-tile .etiqueta { color: #444 !important; }
+
+  /* Los gráficos están pensados para fondo oscuro (ejes claros); en el PDF
+     nos quedamos con las tablas, que llevan los mismos datos y se leen mejor
+     impresas en blanco y negro. */
+  .printing-target .chart-wrap { display: none; }
+
+  .printing-target button,
+  .printing-target select,
+  .printing-target input,
+  .printing-target label { display: none !important; }
+
+  @page { margin: 1.5cm; }
+}

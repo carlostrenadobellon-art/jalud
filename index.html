@@ -46,6 +46,7 @@
       <button data-tab="entrada" class="tab-btn active">Entrada semanal</button>
       <button data-tab="rankings" class="tab-btn">Rankings</button>
       <button data-tab="perfil" class="tab-btn">Perfil jugador</button>
+      <button data-tab="historial" class="tab-btn">Historial</button>
       <button data-tab="jugadores" class="tab-btn">Jugadores</button>
     </nav>
 
@@ -59,8 +60,16 @@
 
     <div id="tabRankings" class="tab-panel hidden">
       <div class="card">
+        <div class="print-header">
+          <img src="icons/escudo-levante.png" alt="Escudo Levante UD" class="print-crest">
+          <div>
+            <h2>Competitiva Interna Juvenil A</h2>
+            <p id="printSubtitleRankings"></p>
+          </div>
+        </div>
         <label>Mes</label>
         <select id="selectMes"></select>
+        <button type="button" id="btnDescargarPdfRankings" class="btn-secundario">Descargar PDF</button>
         <div class="chart-wrap"><canvas id="chartMensual"></canvas></div>
         <h3>Top 5 del mes</h3>
         <ol id="top5Mensual"></ol>
@@ -77,10 +86,18 @@
 
     <div id="tabPerfil" class="tab-panel hidden">
       <div class="card">
+        <div class="print-header">
+          <img src="icons/escudo-levante.png" alt="Escudo Levante UD" class="print-crest">
+          <div>
+            <h2>Competitiva Interna Juvenil A</h2>
+            <p id="printSubtitlePerfil"></p>
+          </div>
+        </div>
         <label>Jugador</label>
         <select id="selectPerfilJugador"></select>
 
         <div id="perfilContenido" class="hidden">
+          <button type="button" id="btnDescargarPdfPerfil" class="btn-secundario">Descargar PDF</button>
           <h3>Evolución de puntos por semana</h3>
           <div class="chart-wrap"><canvas id="chartPerfilEvolucion"></canvas></div>
 
@@ -94,6 +111,13 @@
           <div id="tablaPerfilSemanal" class="table-scroll"></div>
         </div>
         <p id="perfilSinDatos" class="msg hidden">Este jugador todavía no tiene puntuaciones registradas.</p>
+      </div>
+    </div>
+
+    <div id="tabHistorial" class="tab-panel hidden">
+      <div class="card">
+        <p>Todas las tareas registradas en la temporada. Edita para corregir/completar puntuaciones, o elimina la tarea entera.</p>
+        <div id="historicoContainer" class="table-scroll"></div>
       </div>
     </div>
 

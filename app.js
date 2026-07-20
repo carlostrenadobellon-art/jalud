@@ -95,13 +95,14 @@
 
   // ---------- Vista Técnico ----------
 
+  function activarTab(nombre) {
+    $$('.tab-btn').forEach((b) => b.classList.toggle('active', b.dataset.tab === nombre));
+    $$('.tab-panel').forEach((p) => p.classList.add('hidden'));
+    $('#tab' + nombre.charAt(0).toUpperCase() + nombre.slice(1)).classList.remove('hidden');
+  }
+
   $$('.tab-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      $$('.tab-btn').forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
-      $$('.tab-panel').forEach((p) => p.classList.add('hidden'));
-      $('#tab' + btn.dataset.tab.charAt(0).toUpperCase() + btn.dataset.tab.slice(1)).classList.remove('hidden');
-    });
+    btn.addEventListener('click', () => activarTab(btn.dataset.tab));
   });
 
   let tecnicoInit = false;
@@ -142,6 +143,8 @@
     });
     cargarJugadoresParaBaja();
     initPerfilJugador();
+    initHistorial();
+    initDescargaPdf();
 
     $('#formAlta').addEventListener('submit', (e) => {
       e.preventDefault();
@@ -313,11 +316,81 @@
     $('#tablaPerfilSemanal').innerHTML = html;
   }
 
+  // ---------- Historial de tareas ----------
+
+  let historialInit = false;
+
+  function initHistorial() {
+    if (historialInit) return;
+    historialInit = true;
+    cargarHistorico();
+  }
+
+  function cargarHistorico() {
+    apiGet('historicoTareas').then((res) => {
+      if (!res.ok) return;
+      pintarHistorico(res.tareas);
+    });
+  }
+
+  function pintarHistorico(tareas) {
+    if (tareas.length === 0) {
+      $('#historicoContainer').innerHTML = '<p>Todavía no hay ninguna tarea registrada.</p>';
+      return;
+    }
+    let html = '<table class="grid"><thead><tr><th>Fecha</th><th>Tarea</th><th>Semana</th><th>Jugadores</th><th>Puntos</th><th>Acciones</th></tr></thead><tbody>';
+    tareas.forEach((t) => {
+      html += '<tr>'
+        + '<td>' + t.fecha + '</td>'
+        + '<td class="name">' + t.tarea + '</td>'
+        + '<td>' + t.semana + '</td>'
+        + '<td>' + t.numJugadores + '</td>'
+        + '<td>' + t.puntosTotales + '</td>'
+        + '<td><div class="row-actions">'
+        + '<button type="button" class="btn-editar-tarea" data-semana="' + t.semana + '" data-tarea="' + encodeURIComponent(t.tarea) + '" data-fecha="' + t.fecha + '">Editar</button>'
+        + '<button type="button" class="btn-eliminar btn-eliminar-tarea" data-tarea="' + encodeURIComponent(t.tarea) + '" data-fecha="' + t.fecha + '">Eliminar</button>'
+        + '</div></td>'
+        + '</tr>';
+    });
+    html += '</tbody></table>';
+    $('#historicoContainer').innerHTML = html;
+
+    $$('.btn-editar-tarea').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        irAEditarTarea(btn.dataset.semana, decodeURIComponent(btn.dataset.tarea), btn.dataset.fecha);
+      });
+    });
+
+    $$('.btn-eliminar-tarea').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const tarea = decodeURIComponent(btn.dataset.tarea);
+        const fecha = btn.dataset.fecha;
+        if (!confirm('¿Eliminar la tarea "' + tarea + '" del ' + fecha + ' para todos los jugadores? Esta acción no se puede deshacer desde la app.')) return;
+        apiPost('eliminarTarea', { tarea, fecha }).then((res) => {
+          if (!res.ok) { alert(res.error); return; }
+          cargarHistorico();
+        });
+      });
+    });
+  }
+
+  /** Reabre una tarea ya guardada, en la pestaña "Entrada semanal", lista para corregir/completar. */
+  function irAEditarTarea(semana, tarea, fecha) {
+    activarTab('entrada');
+    $('#selectSemana').value = semana;
+    cargarSemana(semana).then(() => {
+      const btn = document.querySelector(
+        '.tarea-link[data-tarea="' + encodeURIComponent(tarea) + '"][data-fecha="' + fecha + '"]'
+      );
+      if (btn) btn.click();
+    });
+  }
+
   let semanaEnCurso = null;
 
   function cargarSemana(numSemana) {
     semanaEnCurso = numSemana;
-    apiGet('semana', { numSemana }).then((res) => {
+    return apiGet('semana', { numSemana }).then((res) => {
       if (!res.ok) { $('#gridContainer').innerHTML = '<p class="error">' + res.error + '</p>'; return; }
       pintarGrid(res);
     });
@@ -554,6 +627,37 @@
       chartJugadorAnual = pintarChart('chartJugadorAnual', chartJugadorAnual, res.ranking);
       pintarTop5('#jugadorTop5Anual', res.ranking.slice(0, 5));
     });
+  }
+
+  // ---------- Descargar PDF (imprimir con estilo de marca) ----------
+
+  let descargaPdfInit = false;
+
+  function initDescargaPdf() {
+    if (descargaPdfInit) return;
+    descargaPdfInit = true;
+
+    window.addEventListener('afterprint', () => {
+      $$('.printing-target').forEach((el) => el.classList.remove('printing-target'));
+    });
+
+    $('#btnDescargarPdfRankings').addEventListener('click', () => {
+      const mesLabel = formatMesLabel_($('#selectMes').value);
+      $('#printSubtitleRankings').textContent = 'Ranking de ' + mesLabel + ' y acumulado anual — generado el ' + new Date().toLocaleDateString('es-ES');
+      imprimirTarjeta_('#tabRankings');
+    });
+
+    $('#btnDescargarPdfPerfil').addEventListener('click', () => {
+      const jugador = $('#selectPerfilJugador').value;
+      $('#printSubtitlePerfil').textContent = 'Perfil de jugador — ' + jugador + ' — generado el ' + new Date().toLocaleDateString('es-ES');
+      imprimirTarjeta_('#tabPerfil');
+    });
+  }
+
+  function imprimirTarjeta_(selectorPanel) {
+    const tarjeta = $(selectorPanel).querySelector('.card');
+    tarjeta.classList.add('printing-target');
+    window.print();
   }
 
   // ---------- Arranque ----------
