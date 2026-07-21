@@ -756,7 +756,7 @@
   function pintarListaMitad_(sel, lista) {
     if (lista.length === 0) { $(sel).innerHTML = '<li>Sin datos.</li>'; return; }
     $(sel).innerHTML = lista.map((r) =>
-      '<li><span class="nombre">' + r.jugador + '</span><span class="puntos">prom. ' + r.promedio.toFixed(2) + '</span></li>'
+      '<li><span class="nombre">' + r.jugador + '</span><span class="puntos">' + r.promedio.toFixed(2) + '</span></li>'
     ).join('');
   }
 
